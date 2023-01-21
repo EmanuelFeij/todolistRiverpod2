@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:todolist/models/note.dart';
+import 'package:todolist/state/note_state_notifier.dart';
+import 'package:todolist/widgets/my_form.dart';
+import 'package:todolist/widgets/note_widget.dart';
 
 void main() => runApp(const ProviderScope(child: MyApp()));
 
@@ -21,49 +25,39 @@ class HomePage extends ConsumerWidget {
   const HomePage({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    print("Building chit");
     return Scaffold(
-        appBar: AppBar(
-          title: Consumer(
+      appBar: AppBar(
+        title: Text("Notes"),
+      ),
+      body: Column(
+        children: [
+          Consumer(
             builder: (BuildContext context, WidgetRef ref, Widget? child) {
-              final count = ref.watch(counterProvider);
-              final text =
-                  count == null ? "Press The button" : count.toString();
-              return Text(text);
+              final notesAdder = ref.read(notesProvider.notifier).addNote;
+              return MyCustomForm(onSubmit: notesAdder);
             },
           ),
-        ),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextButton(
-                onPressed: ref.read(counterProvider.notifier).increment,
-                child: const Text("Press Me"))
-          ],
-        ));
+          Consumer(
+              builder: (BuildContext context, WidgetRef ref, Widget? child) {
+            final notes = ref.watch(notesProvider);
+            return Expanded(
+                child: ListView.builder(
+                    itemCount: notes.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return NoteWidget(
+                        note: notes[index],
+                      );
+                    }));
+          }),
+        ],
+      ),
+    );
   }
 }
 
 // StateNotifierProvider
-final counterProvider =
-    StateNotifierProvider<Counter, int?>((ref) => Counter());
+final notesProvider = StateNotifierProvider<NotesListNotifier, Notes>(
+    (ref) => NotesListNotifier());
 
 // StateNotifier
-class Counter extends StateNotifier<int?> {
-  Counter() : super(null);
-  void increment() => state = state == null ? 1 : state + 1;
-}
 
-// extension to sum two optionals num's
-// operator +
-// null + 1 = null
-// 1 + null = 1
-extension SomeExtension<T extends num> on T? {
-  T? operator +(T? other) {
-    final shadow = this;
-    if (shadow != null) {
-      return shadow + (other ?? 0) as T;
-    }
-    return null;
-  }
-}
