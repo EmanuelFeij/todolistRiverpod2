@@ -13,7 +13,7 @@ class NoteWidget extends StatelessWidget {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
         return Dismissible(
-          onDismissed: (directon) {
+          onDismissed: (direction) {
             final prov = ref.read(notesProvider.notifier);
             prov.removeNote(note);
           },

@@ -1,1 +1,0 @@
-extension StringEmptyOrNot on String {}
